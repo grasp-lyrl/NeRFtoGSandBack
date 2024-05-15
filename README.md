@@ -1,34 +1,59 @@
-# nerfstudio-method-template
-Template repository for creating and registering methods in Nerfstudio.
+# From NeRFs to Gaussian Splats, and Back
+An efficient procedure to convert back and forth between NeRF and GS, and thereby get the best of both approaches.
 
-## File Structure
-We recommend the following file structure:
+## Installation
+This repository follows the nerfstudio method [template](https://github.com/nerfstudio-project/nerfstudio-method-template/tree/main)
 
-```
-├── my_method
-│   ├── __init__.py
-│   ├── my_config.py
-│   ├── custom_pipeline.py [optional]
-│   ├── custom_model.py [optional]
-│   ├── custom_field.py [optional]
-│   ├── custom_datamanger.py [optional]
-│   ├── custom_dataparser.py [optional]
-│   ├── ...
-├── pyproject.toml
-```
+### 0. Install Nerfstudio dependencies
+Please follow the Nerfstudio [installation guide](https://docs.nerf.studio/quickstart/installation.html)  to create an environment and install dependencies.
 
-## Registering with Nerfstudio
-Ensure that nerfstudio has been installed according to the [instructions](https://docs.nerf.studio/en/latest/quickstart/installation.html). Clone or fork this repository and run the commands:
+### 1. Install the repository
+Clone and navigate into this repository. Run the following commands:
 
-```
-conda activate nerfstudio
-cd nerfstudio-method-template/
-pip install -e .
-ns-install-cli
-```
+`pip install -e nerfgs`
 
-## Running the new method
-This repository creates a new Nerfstudio method named "method-template". To train with it, run the command:
-```
-ns-train method-template --data [PATH]
-```
+and
+
+`pip install -e splatting`.
+
+Finally, run `ns-install-cli`.
+
+### 2. Check installation
+Run `ns-train --help`. You should be able to find two methods, `nerfgs` and `splatting`, in the list of methods.
+
+## Downloading data
+You could download the Giannini-Hall and aspen datasets from [this google drive link](https://drive.google.com/drive/folders/19TV6kdVGcmg3cGZ1bNIUnBBMD-iQjRbG). For our new dataset, Wissahickon and Locust-Walk, coming soon.
+
+## NeRFs to Gaussian Splats
+### Training nerfgs
+run the following command for training. Replace `DATA_PATH` with the data directory location.
+
+`ns-train nerfgs --data DATA_PATH --pipeline.model.camera-optimizer.mode off `
+
+### Export splats from nerfgs
+Replace `CONFIG_LOCATION` with the location of config file saved after training.
+
+`ns-export-nerfgs --load-config CONFIG_LOCATION --output-dir exports/nerfgs/ --num-points 2000000 --remove-outliers True --normal-method open3d --use_bounding_box False`
+
+### Show exported splats
+Replace `DATA_PATH` with the data directory location.
+
+`ns-train splatting --data DATA_PATH --max-num-iterations 1 --pipeline.model.ply-file-path exports/nerfgs/nerfgs.ply`
+
+### Finetuning the splats
+We reduces the learning rate for finetuning.
+
+`ns-train splatting --dataCONFIG_LOCATION --max-num-iterations 5001 --pipeline.model.ply-file-path exports/nerfgs/nerfgs.ply --pipeline.model.sh-degree-interval 0 --pipeline.model.warmup-length 100 --optimizers.xyz.optimizer.lr 0.00001 --optimizers.xyz.scheduler.lr-pre-warmup 0.0000001 --optimizers.xyz.scheduler.lr-final 0.0000001 --optimizers.features-dc.optimizer.lr 0.01 --optimizers.features-rest.optimizer.lr 0.001 --optimizers.opacity.optimizer.lr 0.05 --optimizers.scaling.optimizer.lr 0.01 --optimizers.rotation.optimizer.lr 0.0000000001 --optimizers.camera-opt.optimizer.lr 0.0000000001 --optimizers.camera-opt.scheduler.lr-pre-warmup 0.0000000001 --optimizers.camera-opt.scheduler.lr-final 0.0000000001`
+
+## Gaussian Splats to NeRFs
+
+### Scene modification
+Coming soon
+
+### Creating new dataset
+In the new dataset, training images are rendered from splats. Replace `CONFIG_LOCATION` with the location of config file saved after training.
+
+`ns-splatting-render --load-config CONFIG_LOCATION --render-output-path exports/splatting_data --export-nerf-gs-data`
+
+### Training on new dataset
+`ns-train nerfgs --data exports/splatting_data --pipeline.model.camera-optimizer.mode off nerfstudio-data --eval-mode filename`

@@ -1,0 +1,16 @@
+[project]
+name = "nerfgs"
+description = "nerfgs repository."
+version = "0.1.0"
+
+dependencies = ["nerfstudio >= 0.3.0"] 
+
+[tool.setuptools.packages.find]
+include = ["nerfgs*"]
+
+# register the entry point of your new method here:
+[project.entry-points.'nerfstudio.method_configs']
+nerfgs = 'nerfgs.nerfgs_config:nerfgs'
+
+[project.scripts]
+ns-export-nerfgs = "nerfgs.nerfgs_exporter:entrypoint"
