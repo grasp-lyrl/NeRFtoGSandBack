@@ -26,9 +26,14 @@ You could download the Giannini-Hall and aspen datasets from [this google drive 
 
 ## NeRFs to Gaussian Splats
 ### Training nerfgs
-run the following command for training. Replace `DATA_PATH` with the data directory location.
+Run the following command for training. Replace `DATA_PATH` with the data directory location.
 
 `ns-train nerfgs --data DATA_PATH --pipeline.model.camera-optimizer.mode off `
+
+To train on Wissahickon or Locust-Walk dataset, you need to add `nerfstudio-data --eval-mode filename` to properly split training and validation data, i.e.,
+
+`ns-train nerfgs --data DATA_PATH --pipeline.model.camera-optimizer.mode off nerfstudio-data --eval-mode filename`
+
 
 ### Export splats from nerfgs
 Replace `CONFIG_LOCATION` with the location of config file saved after training.
@@ -36,12 +41,12 @@ Replace `CONFIG_LOCATION` with the location of config file saved after training.
 `ns-export-nerfgs --load-config CONFIG_LOCATION --output-dir exports/nerfgs/ --num-points 2000000 --remove-outliers True --normal-method open3d --use_bounding_box False`
 
 ### Show exported splats
-Replace `DATA_PATH` with the data directory location.
+Replace `DATA_PATH` with the data directory location. You also need to add `nerfstudio-data --eval-mode filename` if train on Wissahickon or Locust-Walk.
 
 `ns-train splatting --data DATA_PATH --max-num-iterations 1 --pipeline.model.ply-file-path exports/nerfgs/nerfgs.ply`
 
 ### Finetuning the splats
-We reduces the learning rate for finetuning.
+We reduces the learning rate for finetuning. You also need to add `nerfstudio-data --eval-mode filename` if train on Wissahickon or Locust-Walk.
 
 `ns-train splatting --dataCONFIG_LOCATION --max-num-iterations 5001 --pipeline.model.ply-file-path exports/nerfgs/nerfgs.ply --pipeline.model.sh-degree-interval 0 --pipeline.model.warmup-length 100 --optimizers.xyz.optimizer.lr 0.00001 --optimizers.xyz.scheduler.lr-pre-warmup 0.0000001 --optimizers.xyz.scheduler.lr-final 0.0000001 --optimizers.features-dc.optimizer.lr 0.01 --optimizers.features-rest.optimizer.lr 0.001 --optimizers.opacity.optimizer.lr 0.05 --optimizers.scaling.optimizer.lr 0.01 --optimizers.rotation.optimizer.lr 0.0000000001 --optimizers.camera-opt.optimizer.lr 0.0000000001 --optimizers.camera-opt.scheduler.lr-pre-warmup 0.0000000001 --optimizers.camera-opt.scheduler.lr-final 0.0000000001`
 
