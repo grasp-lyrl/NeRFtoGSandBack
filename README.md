@@ -62,3 +62,15 @@ In the new dataset, training images are rendered from splats. Replace `CONFIG_LO
 
 ### Training on new dataset
 `ns-train nerfgs --data exports/splatting_data --pipeline.model.camera-optimizer.mode off nerfstudio-data --eval-mode filename`
+
+## Bibtex
+```
+@misc{he2024nerfs,
+      title={From NeRFs to Gaussian Splats, and Back}, 
+      author={Siming He and Zach Osman and Pratik Chaudhari},
+      year={2024},
+      eprint={2405.09717},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+```
