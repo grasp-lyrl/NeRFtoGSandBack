@@ -1,5 +1,5 @@
 # From NeRFs to Gaussian Splats, and Back
-[Paper](https://arxiv.org/pdf/2405.09717): An efficient procedure to convert back and forth between NeRF and GS, and thereby get the best of both approaches.
+[Paper](https://arxiv.org/abs/2405.09717): An efficient procedure to convert back and forth between NeRF and GS, and thereby get the best of both approaches.
 
 ## Installation
 This repository follows the nerfstudio method [template](https://github.com/nerfstudio-project/nerfstudio-method-template/tree/main)
