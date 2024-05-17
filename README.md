@@ -1,5 +1,5 @@
 # From NeRFs to Gaussian Splats, and Back
-This is the implementation of [From NeRFs to Gaussian Splats, and Back](https://arxiv.org/abs/2405.09717); An efficient procedure to convert back and forth between NeRF and GS, and thereby get the best of both approaches.
+This is the implementation of [From NeRFs to Gaussian Splats, and Back](https://arxiv.org/abs/2405.09717); An efficient procedure to convert back and forth between NeRF and GS, and thereby get the best of both approaches. New dataset in the paper can be downloaded from [this google drive link](https://drive.google.com/drive/folders/1xvbONL4EVgHxaHMsV101455l_jNgyaUM?usp=sharing).
 
 ## Installation
 This repository follows the nerfstudio method [template](https://github.com/nerfstudio-project/nerfstudio-method-template/tree/main)
@@ -22,7 +22,7 @@ Finally, run `ns-install-cli`.
 Run `ns-train --help`. You should be able to find two methods, `nerfgs` and `splatting`, in the list of methods.
 
 ## Downloading data
-You could download the Giannini-Hall and aspen datasets from [this google drive link](https://drive.google.com/drive/folders/19TV6kdVGcmg3cGZ1bNIUnBBMD-iQjRbG). Our new dataset (Wissahickon and Locust-Walk) can be downloaded from [this google drive link](https://drive.google.com/drive/folders/1xvbONL4EVgHxaHMsV101455l_jNgyaUM?usp=sharing)
+You could download the Giannini-Hall and aspen datasets from [this google drive link](https://drive.google.com/drive/folders/19TV6kdVGcmg3cGZ1bNIUnBBMD-iQjRbG). Our new dataset (Wissahickon and Locust-Walk) can be downloaded from [this google drive link](https://drive.google.com/drive/folders/1xvbONL4EVgHxaHMsV101455l_jNgyaUM?usp=sharing).
 
 ## NeRFs to Gaussian Splats
 ### Training nerfgs
