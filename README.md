@@ -63,7 +63,7 @@ In the new dataset, training images are rendered from splats. Replace `CONFIG_LO
 ### Training on new dataset
 `ns-train nerfgs --data exports/splatting_data --pipeline.model.camera-optimizer.mode off nerfstudio-data --eval-mode filename`
 
-## Extending Nerfgs
+## Extending the method
 The conversion from NeRF to GS has inefficiency as mentioned at the discussion section of the paper. We welcome your efforts to reduce the inefficiency! The code for conversion is mainly in `nerfgs/nerfgs/nerfgs_exporter.py`.
 
 ## Bibtex
