@@ -22,7 +22,7 @@ Finally, run `ns-install-cli`.
 Run `ns-train --help`. You should be able to find two methods, `nerfgs` and `splatting`, in the list of methods.
 
 ## Downloading data
-You could download the Giannini-Hall and aspen datasets from [this google drive link](https://drive.google.com/drive/folders/19TV6kdVGcmg3cGZ1bNIUnBBMD-iQjRbG). For our new dataset, Wissahickon and Locust-Walk, coming soon.
+You could download the Giannini-Hall and aspen datasets from [this google drive link](https://drive.google.com/drive/folders/19TV6kdVGcmg3cGZ1bNIUnBBMD-iQjRbG). Our new dataset (Wissahickon and Locust-Walk) can be downloaded from [this google drive link](https://drive.google.com/drive/folders/1xvbONL4EVgHxaHMsV101455l_jNgyaUM?usp=sharing)
 
 ## NeRFs to Gaussian Splats
 ### Training nerfgs
@@ -55,7 +55,7 @@ We reduces the learning rate for finetuning. You also need to add `nerfstudio-da
 ### Scene modification
 Coming soon
 
-### Creating new dataset
+### Rendering new training images
 In the new dataset, training images are rendered from splats. Replace `CONFIG_LOCATION` with the location of config file saved after training.
 
 `ns-splatting-render --load-config CONFIG_LOCATION --render-output-path exports/splatting_data --export-nerf-gs-data`
