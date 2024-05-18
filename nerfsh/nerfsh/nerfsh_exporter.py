@@ -357,7 +357,7 @@ class ExportNerfGS(Exporter):
           # find the average of the three nearest neighbors for each point and use that as the scale
           avg_dist = distances.mean(dim=-1, keepdim=True)
           avg_dist = torch.min(avg_dist, torch.quantile(avg_dist, 0.8))
-          scales = torch.log(avg_dist.repeat(1, 3)).cpu().numpy()
+          scales = torch.log((avg_dist.repeat(1, 3) / 2)).cpu().numpy()
           for i in range(3):
                 nerfgs_data[f"scale_{i}"] = scales[:, i, None]
 

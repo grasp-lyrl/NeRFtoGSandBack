@@ -14,6 +14,7 @@ from nerfgs.nerfgs_pipeline import (
 from nerfstudio.cameras.camera_optimizers import CameraOptimizerConfig
 from nerfstudio.data.datamanagers.parallel_datamanager import ParallelDataManagerConfig
 from nerfstudio.data.dataparsers.nerfstudio_dataparser import NerfstudioDataParserConfig
+
 from nerfstudio.configs.base_config import ViewerConfig
 from nerfstudio.data.dataparsers.nerfstudio_dataparser import NerfstudioDataParserConfig
 from nerfstudio.engine.optimizers import AdamOptimizerConfig, RAdamOptimizerConfig
@@ -22,55 +23,58 @@ from nerfstudio.engine.schedulers import (
 )
 from nerfstudio.engine.trainer import TrainerConfig
 from nerfstudio.plugins.types import MethodSpecification
+from nerfstudio.data.datamanagers.full_images_datamanager import FullImageDatamanagerConfig
+from nerfstudio.pipelines.base_pipeline import VanillaPipelineConfig
+
 
 nerfgs = MethodSpecification(
     config=TrainerConfig(
-        method_name="nerfgs", 
-        steps_per_eval_batch=500,
+        method_name="nerfgs",
+        steps_per_eval_image=100,
+        steps_per_eval_batch=0,
         steps_per_save=2000,
+        steps_per_eval_all_images=1000,
         max_num_iterations=30000,
-        mixed_precision=True,
+        mixed_precision=False,
+        gradient_accumulation_steps={"camera_opt": 100},
         pipeline=nerfgsPipelineConfig(
-            datamanager=ParallelDataManagerConfig(
-                dataparser=NerfstudioDataParserConfig(),
-                train_num_rays_per_batch=8192,
-                eval_num_rays_per_batch=4096,
+            datamanager=FullImageDatamanagerConfig(
+                dataparser=NerfstudioDataParserConfig(load_3D_points=True),
             ),
-            model=nerfgsModelConfig(
-                num_nerf_samples_per_ray=128,
-                num_proposal_samples_per_ray=(512, 256),
-                hidden_dim=128,
-                hidden_dim_color=128,
-                appearance_embed_dim=128,
-                max_res=4096,
-                proposal_weights_anneal_max_num_iters=5000,
-                log2_hashmap_size=21,
-                eval_num_rays_per_chunk=1 << 15,
-                camera_optimizer=CameraOptimizerConfig(mode="SO3xR3"),
-            ),
+            model=nerfgsModelConfig(),
         ),
         optimizers={
-            "proposal_networks": {
-                "optimizer": AdamOptimizerConfig(lr=1e-2, eps=1e-15),
+            "xyz": {
+                "optimizer": AdamOptimizerConfig(lr=1.6e-4, eps=1e-15),
                 "scheduler": ExponentialDecaySchedulerConfig(
-                    lr_final=0.0001, max_steps=200000
+                    lr_final=1.6e-6,
+                    max_steps=30000,
                 ),
             },
-            "fields": {
-                "optimizer": AdamOptimizerConfig(lr=1e-2, eps=1e-15),
-                "scheduler": ExponentialDecaySchedulerConfig(
-                    lr_final=0.0001, max_steps=200000
-                ),
+            "features_dc": {
+                "optimizer": AdamOptimizerConfig(lr=0.0025, eps=1e-15),
+                "scheduler": None,
             },
+            "features_rest": {
+                "optimizer": AdamOptimizerConfig(lr=0.0025 / 20, eps=1e-15),
+                "scheduler": None,
+            },
+            "opacity": {
+                "optimizer": AdamOptimizerConfig(lr=0.05, eps=1e-15),
+                "scheduler": None,
+            },
+            "scaling": {
+                "optimizer": AdamOptimizerConfig(lr=0.005, eps=1e-15),
+                "scheduler": None,
+            },
+            "rotation": {"optimizer": AdamOptimizerConfig(lr=0.001, eps=1e-15), "scheduler": None},
             "camera_opt": {
                 "optimizer": AdamOptimizerConfig(lr=1e-3, eps=1e-15),
-                "scheduler": ExponentialDecaySchedulerConfig(
-                    lr_final=1e-4, max_steps=5000
-                ),
+                "scheduler": ExponentialDecaySchedulerConfig(lr_final=5e-5, max_steps=30000),
             },
         },
         viewer=ViewerConfig(num_rays_per_chunk=1 << 15),
         vis="viewer",
     ),
-    description="nerfgs method.",
+    description="nerfgs: convert nerfsh to gs.",
 )

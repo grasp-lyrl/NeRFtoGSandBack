@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# nerfgs field based on modification of the nerfacto field.
+# nerfsh field based on modification of the nerfacto field.
 
 from typing import Dict, Literal, Optional, Tuple
 
@@ -38,7 +38,7 @@ from nerfstudio.fields.base_field import Field, get_normalized_directions
 from gsplat.sh import num_sh_bases, spherical_harmonics
 
 
-class nerfgsField(Field):
+class nerfshField(Field):
     """Template Field
 
     Args:

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Modified eval.py to export rendered dataset from splatting model
+# Modified eval.py to export rendered dataset from nerfgs model
 
 #!/usr/bin/env python
 

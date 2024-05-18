@@ -16,16 +16,16 @@ Please follow the Nerfstudio [installation guide](https://docs.nerf.studio/quick
 ### 1. Install the repository
 Clone and navigate into this repository. Run the following commands:
 
-`pip install -e nerfgs`
+`pip install -e nerfsh`
 
 and
 
-`pip install -e splatting`.
+`pip install -e nerfgs`.
 
 Finally, run `ns-install-cli`.
 
 ### 2. Check installation
-Run `ns-train --help`. You should be able to find two methods, `nerfgs` and `splatting`, in the list of methods.
+Run `ns-train --help`. You should be able to find two methods, `nerfsh` and `nerfgs`, in the list of methods.
 
 ## Downloading data
 You could download the Giannini-Hall and aspen datasets from [this google drive link](https://drive.google.com/drive/folders/19TV6kdVGcmg3cGZ1bNIUnBBMD-iQjRbG). Our new dataset (Wissahickon and Locust-Walk) can be downloaded from [this google drive link](https://drive.google.com/drive/folders/1xvbONL4EVgHxaHMsV101455l_jNgyaUM?usp=sharing).
@@ -34,27 +34,27 @@ You could download the Giannini-Hall and aspen datasets from [this google drive 
 ### Training NeRF-SH
 Run the following command for training. Replace `DATA_PATH` with the data directory location.
 
-`ns-train nerfgs --data DATA_PATH --pipeline.model.camera-optimizer.mode off `
+`ns-train nerfsh --data DATA_PATH --pipeline.model.camera-optimizer.mode off `
 
 To train on Wissahickon or Locust-Walk dataset, you need to add `nerfstudio-data --eval-mode filename` to properly split training and validation data, i.e.,
 
-`ns-train nerfgs --data DATA_PATH --pipeline.model.camera-optimizer.mode off nerfstudio-data --eval-mode filename`
+`ns-train nerfsh --data DATA_PATH --pipeline.model.camera-optimizer.mode off nerfstudio-data --eval-mode filename`
 
 
 ### NeRFGS: Converting NeRF-SH to Guassian splats
 Replace `CONFIG_LOCATION` with the location of config file saved after training.
 
-`ns-export-nerfgs --load-config CONFIG_LOCATION --output-dir exports/nerfgs/ --num-points 2000000 --remove-outliers True --normal-method open3d --use_bounding_box False`
+`ns-export-nerfsh --load-config CONFIG_LOCATION --output-dir exports/nerfgs/ --num-points 2000000 --remove-outliers True --normal-method open3d --use_bounding_box False`
 
 ### Visualize converted Gaussian splats
 Replace `DATA_PATH` with the data directory location. You also need to add `nerfstudio-data --eval-mode filename` if train on Wissahickon or Locust-Walk.
 
-`ns-train splatting --data DATA_PATH --max-num-iterations 1 --pipeline.model.ply-file-path exports/nerfgs/nerfgs.ply`
+`ns-train nerfgs --data DATA_PATH --max-num-iterations 1 --pipeline.model.ply-file-path exports/nerfgs/nerfgs.ply`
 
 ### Fintuned NeRFGS 
 We reduces the learning rate for finetuning. You also need to add `nerfstudio-data --eval-mode filename` if train on Wissahickon or Locust-Walk.
 
-`ns-train splatting --data DATA_PATH --pipeline.model.ply-file-path exports/nerfgs/nerfgs.ply --max-num-iterations 5000 --pipeline.model.sh-degree-interval 0 --pipeline.model.warmup-length 100 --optimizers.xyz.optimizer.lr 0.00001 --optimizers.xyz.scheduler.lr-pre-warmup 0.0000001 --optimizers.xyz.scheduler.lr-final 0.0000001 --optimizers.features-dc.optimizer.lr 0.01 --optimizers.features-rest.optimizer.lr 0.001 --optimizers.opacity.optimizer.lr 0.05 --optimizers.scaling.optimizer.lr 0.01 --optimizers.rotation.optimizer.lr 0.0000000001 --optimizers.camera-opt.optimizer.lr 0.0000000001 --optimizers.camera-opt.scheduler.lr-pre-warmup 0.0000000001 --optimizers.camera-opt.scheduler.lr-final 0.0000000001 --vis viewer --pipeline.model.ply-file-path exports/nerfgs/nerfgs.ply`
+`ns-train nerfgs --data DATA_PATH --pipeline.model.ply-file-path exports/nerfgs/nerfgs.ply --max-num-iterations 5000 --pipeline.model.sh-degree-interval 0 --pipeline.model.warmup-length 100 --optimizers.xyz.optimizer.lr 0.00001 --optimizers.xyz.scheduler.lr-pre-warmup 0.0000001 --optimizers.xyz.scheduler.lr-final 0.0000001 --optimizers.features-dc.optimizer.lr 0.01 --optimizers.features-rest.optimizer.lr 0.001 --optimizers.opacity.optimizer.lr 0.05 --optimizers.scaling.optimizer.lr 0.01 --optimizers.rotation.optimizer.lr 0.0000000001 --optimizers.camera-opt.optimizer.lr 0.0000000001 --optimizers.camera-opt.scheduler.lr-pre-warmup 0.0000000001 --optimizers.camera-opt.scheduler.lr-final 0.0000000001`
 
 ## GSNeRF: Gaussian Splats to NeRFs
 
@@ -64,13 +64,13 @@ Coming soon
 ### Rendering new training images
 In the new dataset, training images are rendered from splats. Replace `CONFIG_LOCATION` with the location of config file saved after training.
 
-`ns-splatting-render --load-config CONFIG_LOCATION --render-output-path exports/splatting_data --export-nerf-gs-data`
+`ns-nerfgs-render --load-config CONFIG_LOCATION --render-output-path exports/splatting_data --export-nerf-gs-data`
 
 ### GSNeRF: Training on new training images
-`ns-train nerfgs --data exports/splatting_data --pipeline.model.camera-optimizer.mode off nerfstudio-data --eval-mode filename`
+`ns-train nerfsh --data exports/splatting_data --pipeline.model.camera-optimizer.mode off nerfstudio-data --eval-mode filename`
 
 ## Extending the method
-The conversion from NeRF to GS has inefficiency as mentioned at the discussion section of the paper. We welcome your efforts to reduce the inefficiency! The code for conversion is mainly in `nerfgs/nerfgs/nerfgs_exporter.py`.
+The conversion from NeRF to GS has inefficiency as mentioned at the discussion section of the paper. We welcome your efforts to reduce the inefficiency! The code for conversion is mainly in `nerfsh/nerfsh/nerfsh_exporter.py`.
 
 ## Bibtex
 ```

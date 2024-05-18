@@ -1,16 +1,16 @@
 [project]
-name = "splatting"
-description = "splatting repository."
+name = "nerfsh"
+description = "nerfsh: nerf with spherical harmonics output."
 version = "0.1.0"
 
 dependencies = ["nerfstudio >= 0.3.0"] 
 
 [tool.setuptools.packages.find]
-include = ["splatting*"]
+include = ["nerfsh*"]
 
 # register the entry point of your new method here:
 [project.entry-points.'nerfstudio.method_configs']
-splatting = 'splatting.splatting_config:splatting'
+nerfsh = 'nerfsh.nerfsh_config:nerfsh'
 
 [project.scripts]
-ns-splatting-render = "splatting.splatting_render:entrypoint"
+ns-export-nerfsh = "nerfsh.nerfsh_exporter:entrypoint"
