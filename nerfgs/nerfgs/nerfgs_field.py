@@ -78,12 +78,6 @@ class nerfgsField(Field):
     ) -> None:
         super().__init__()
 
-        # st()
-        # log2_hashmap_size = 22
-        # hidden_dim = 128
-        # hidden_dim_color = 128
-        # features_per_level = 2
-
         self.register_buffer("aabb", aabb)
         self.geo_feat_dim = geo_feat_dim
 
@@ -243,10 +237,8 @@ class nerfgsField(Field):
         camera_indices = ray_samples.camera_indices.squeeze()
         directions = (
             ray_samples.frustums.directions
-        )  # get_normalized_directions(ray_samples.frustums.directions).float()
-        # st()
+        ) 
         directions_flat = directions.reshape(-1, 3)
-        # d = self.direction_encoding(directions_flat)
 
         outputs_shape = ray_samples.frustums.directions.shape[:-1]
 

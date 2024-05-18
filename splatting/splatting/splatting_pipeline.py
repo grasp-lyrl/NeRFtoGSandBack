@@ -85,8 +85,6 @@ class splattingPipeline(VanillaPipeline):
     Returns:
         images_dict: dictionary of images with sky pixels removed
     """
-    # st()
-    # for key, rgb in images_dict.items():
     rgb = images_dict['image']
     rgb_img = (rgb.cpu().numpy() * 255).astype(np.uint8)
     bgr_img = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2BGR)
@@ -140,10 +138,6 @@ class splattingPipeline(VanillaPipeline):
               transforms_json['w'] = camera_data.width.item()
               transforms_json['h'] = camera_data.height.item()
               transforms_json['camera_model'] = "SIMPLE_PINHOLE"
-              # transforms_json['k1'] = camera_data.distortion_params[0][0].item()
-              # transforms_json['k2'] = camera_data.distortion_params[0][1].item()
-              # transforms_json['k3'] = camera_data.distortion_params[0][2].item()
-              # transforms_json['k4'] = camera_data.distortion_params[0][3].item()
               transforms_json['frames'] = []
 
               if not os.path.exists(output_path):
@@ -155,7 +149,6 @@ class splattingPipeline(VanillaPipeline):
                   os.makedirs(image_path)
           
           for camera, batch in self.datamanager.fixed_indices_eval_dataloader:
-              # st()
               if self.config.export_nerf_gs_data:
                   rgb_img = (batch['image'].cpu().numpy() * 255).astype(np.uint8)
                   bgr_img = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2BGR)
@@ -177,9 +170,7 @@ class splattingPipeline(VanillaPipeline):
               self.filter_sky_pixels(batch, outputs['rgb'])
                               
               metrics_dict, _ = self.model.get_image_metrics_and_images(outputs, batch)
-              # if output_path is not None:
-              #     raise NotImplementedError("Saving images is not implemented yet")
-
+              
               assert "num_rays_per_sec" not in metrics_dict
               metrics_dict["num_rays_per_sec"] = (num_rays / (time() - inner_start)).item()
               fps_str = "fps"

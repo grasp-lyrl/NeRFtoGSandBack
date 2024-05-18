@@ -38,14 +38,11 @@ from nerfstudio.data.datasets.base_dataset import InputDataset
 from nerfstudio.data.scene_box import OrientedBox
 from nerfstudio.pipelines.base_pipeline import Pipeline, VanillaPipeline
 from nerfstudio.utils.rich_utils import CONSOLE, ItersPerSecColumn
-
 from nerfstudio.data.datamanagers.base_datamanager import VanillaDataManager
 from nerfstudio.data.datamanagers.parallel_datamanager import ParallelDataManager
 from nerfstudio.exporter.exporter_utils import collect_camera_poses, generate_point_cloud, get_mesh_from_filename
 from nerfstudio.utils.eval_utils import eval_setup
 from nerfstudio.scripts.exporter import Exporter, validate_pipeline
-
-from ipdb import set_trace as st
 
 if TYPE_CHECKING:
     # Importing open3d can take ~1 second, so only do it below if we actually
@@ -195,8 +192,6 @@ def generate_nerfgs(
     pcd.points = o3d.utility.Vector3dVector(points.double().cpu().numpy())
     pcd.colors = o3d.utility.Vector3dVector(rgbs.double().cpu().numpy())
     
-    # pcd = pcd.voxel_down_sample(voxel_size=0.002)
-
     ind = None
     if remove_outliers:
         CONSOLE.print("Cleaning Point Cloud")
@@ -232,22 +227,7 @@ def generate_nerfgs(
 
     
     filtered_points = torch.from_numpy(np.asarray(pcd.points)).to(points)
-    # # pipeline.model.field.get_spherical_harmonics()
-    # # save locationa nd harmonics
     density, shs = pipeline.model.field.get_spherical_harmonics(filtered_points)
-    # spherocal_harmonics.append(shs)
-    # densities.append(density)
-    # spherocal_harmonics = torch.cat(spherocal_harmonics, dim=0)
-    # densities = torch.cat(densities, dim=0)
-    # pcd = o3d.geometry.PointCloud()
-    # # st()
-    # pcd.points = o3d.utility.Vector3dVector(filtered_points[torch.squeeze(density!=0)].double().cpu().numpy())
-    
-    # density_mask = torch.squeeze(torch.log(density) > 1)
-    # st()
-    # density = density[density_mask]
-    # shs = shs[density_mask]
-    # filtered_points = filtered_points[density_mask]
         
     return filtered_points, density, shs
 
@@ -345,31 +325,11 @@ class ExportNerfGS(Exporter):
             crop_obb=crop_obb,
             std_ratio=self.std_ratio,
         )
-        
-        # if self.save_world_frame:
-        # # apply the inverse dataparser transform to the point cloud
-        #     points = np.asarray(position.cpu().numpy())
-        #     poses = np.eye(4, dtype=np.float32)[None, ...].repeat(points.shape[0], axis=0)[:, :3, :]
-        #     poses[:, :3, 3] = points
-        #     poses = pipeline.datamanager.train_dataparser_outputs.transform_poses_to_original_space(
-        #         torch.from_numpy(poses)
-        #     )
-        #     position = poses[:, :3, 3]
 
         torch.cuda.empty_cache()
 
         CONSOLE.print(f"[bold green]:white_check_mark: Generated {position.shape[0]}")
-        # CONSOLE.print("Saving Point Cloud...")
-        # tpcd = o3d.t.geometry.PointCloud.from_legacy(pcd)
-        # The legacy PLY writer converts colors to UInt8,
-        # let us do the same to save space.
-        # tpcd.point.colors = (tpcd.point.colors * 255).to(o3d.core.Dtype.UInt8)  # type: ignore
-        # o3d.t.io.write_point_cloud(str(self.output_dir / "point_cloud.ply"), tpcd)
-        # print("\033[A\033[A")
-        
-        # torch.save(position, str(self.output_dir /'position.pt'))
-        # torch.save(density, str(self.output_dir /'density.pt'))
-        # torch.save(spherical_harmonics, str(self.output_dir /'spherical_harmonics.pt'))
+
         nerfgs_filename = self.output_dir / "nerfgs.ply"
         
         nerfgs_data = {}
@@ -396,8 +356,8 @@ class ExportNerfGS(Exporter):
           distances = torch.from_numpy(distances)
           # find the average of the three nearest neighbors for each point and use that as the scale
           avg_dist = distances.mean(dim=-1, keepdim=True)
-          avg_dist = torch.min(avg_dist, torch.median(avg_dist))
-          scales = torch.log(avg_dist.repeat(1, 3) / 2).cpu().numpy()
+          avg_dist = torch.min(avg_dist, torch.quantile(avg_dist, 0.8))
+          scales = torch.log(avg_dist.repeat(1, 3)).cpu().numpy()
           for i in range(3):
                 nerfgs_data[f"scale_{i}"] = scales[:, i, None]
 

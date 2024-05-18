@@ -14,7 +14,6 @@ from nerfgs.nerfgs_pipeline import (
 from nerfstudio.cameras.camera_optimizers import CameraOptimizerConfig
 from nerfstudio.data.datamanagers.parallel_datamanager import ParallelDataManagerConfig
 from nerfstudio.data.dataparsers.nerfstudio_dataparser import NerfstudioDataParserConfig
-
 from nerfstudio.configs.base_config import ViewerConfig
 from nerfstudio.data.dataparsers.nerfstudio_dataparser import NerfstudioDataParserConfig
 from nerfstudio.engine.optimizers import AdamOptimizerConfig, RAdamOptimizerConfig
@@ -26,7 +25,7 @@ from nerfstudio.plugins.types import MethodSpecification
 
 nerfgs = MethodSpecification(
     config=TrainerConfig(
-        method_name="nerfgs",  # TODO: rename to your own model
+        method_name="nerfgs", 
         steps_per_eval_batch=500,
         steps_per_save=2000,
         max_num_iterations=30000,
