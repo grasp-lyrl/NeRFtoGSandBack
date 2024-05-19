@@ -5,7 +5,9 @@ This is the implementation of [From NeRFs to Gaussian Splats, and Back](https://
 
 https://github.com/grasp-lyrl/NeRFtoGSandBack/assets/69362937/3afc680f-962e-4c70-9970-eaf3ca7a1137
 
-
+<p align="center">
+  <img src="https://github.com/grasp-lyrl/NeRFtoGSandBack/assets/69362937/ebfcc76c-69d4-45da-b221-1dcb19f8ce31">
+</p>
 
 ## Installation
 This repository follows the nerfstudio method [template](https://github.com/nerfstudio-project/nerfstudio-method-template/tree/main)
