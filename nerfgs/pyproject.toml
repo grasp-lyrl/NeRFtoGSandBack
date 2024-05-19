@@ -3,7 +3,7 @@ name = "nerfgs"
 description = "nerfgs: convert nerfsh to gs"
 version = "0.1.0"
 
-dependencies = ["nerfstudio >= 0.3.0", "plyfile >= 1.0.3"] 
+dependencies = ["nerfstudio >= 0.3.0", "plyfile >= 1.0.3", "ipdb >= 0.13.13"] 
 
 [tool.setuptools.packages.find]
 include = ["nerfgs*"]
