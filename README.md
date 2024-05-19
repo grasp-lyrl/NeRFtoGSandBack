@@ -83,3 +83,9 @@ The conversion from NeRF to GS has inefficiency as mentioned at the discussion s
       primaryClass={cs.CV}
 }
 ```
+## More demos
+
+
+https://github.com/grasp-lyrl/NeRFtoGSandBack/assets/69362937/8f279f57-31f5-4fdf-9b74-45b05c0ebca8
+
+
