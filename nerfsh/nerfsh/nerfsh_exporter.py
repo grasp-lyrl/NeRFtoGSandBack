@@ -26,7 +26,13 @@ import open3d as o3d
 import pymeshlab
 import torch
 from jaxtyping import Float
-from rich.progress import BarColumn, Progress, TaskProgressColumn, TextColumn, TimeRemainingColumn
+from rich.progress import (
+    BarColumn,
+    Progress,
+    TaskProgressColumn,
+    TextColumn,
+    TimeRemainingColumn,
+)
 from torch import Tensor
 from pathlib import Path
 import tyro
@@ -40,7 +46,11 @@ from nerfstudio.pipelines.base_pipeline import Pipeline, VanillaPipeline
 from nerfstudio.utils.rich_utils import CONSOLE, ItersPerSecColumn
 from nerfstudio.data.datamanagers.base_datamanager import VanillaDataManager
 from nerfstudio.data.datamanagers.parallel_datamanager import ParallelDataManager
-from nerfstudio.exporter.exporter_utils import collect_camera_poses, generate_point_cloud, get_mesh_from_filename
+from nerfstudio.exporter.exporter_utils import (
+    collect_camera_poses,
+    generate_point_cloud,
+    get_mesh_from_filename,
+)
 from nerfstudio.utils.eval_utils import eval_setup
 from nerfstudio.scripts.exporter import Exporter, validate_pipeline
 
@@ -50,6 +60,7 @@ if TYPE_CHECKING:
     import open3d as o3d
 
 import cv2
+
 
 def generate_nerfgs(
     pipeline: Pipeline,
@@ -100,7 +111,10 @@ def generate_nerfgs(
     normals = []
     view_directions = []
     if use_bounding_box and (crop_obb is not None and bounding_box_max is not None):
-        CONSOLE.print("Provided aabb and crop_obb at the same time, using only the obb", style="bold yellow")
+        CONSOLE.print(
+            "Provided aabb and crop_obb at the same time, using only the obb",
+            style="bold yellow",
+        )
     with progress as progress_bar:
         task = progress_bar.add_task("Generating Point Cloud", total=num_points)
         while not progress_bar.finished:
@@ -111,34 +125,52 @@ def generate_nerfgs(
                 outputs = pipeline.model(ray_bundle)
             if rgb_output_name not in outputs:
                 CONSOLE.rule("Error", style="red")
-                CONSOLE.print(f"Could not find {rgb_output_name} in the model outputs", justify="center")
-                CONSOLE.print(f"Please set --rgb_output_name to one of: {outputs.keys()}", justify="center")
+                CONSOLE.print(
+                    f"Could not find {rgb_output_name} in the model outputs",
+                    justify="center",
+                )
+                CONSOLE.print(
+                    f"Please set --rgb_output_name to one of: {outputs.keys()}",
+                    justify="center",
+                )
                 sys.exit(1)
             if depth_output_name not in outputs:
                 CONSOLE.rule("Error", style="red")
-                CONSOLE.print(f"Could not find {depth_output_name} in the model outputs", justify="center")
-                CONSOLE.print(f"Please set --depth_output_name to one of: {outputs.keys()}", justify="center")
+                CONSOLE.print(
+                    f"Could not find {depth_output_name} in the model outputs",
+                    justify="center",
+                )
+                CONSOLE.print(
+                    f"Please set --depth_output_name to one of: {outputs.keys()}",
+                    justify="center",
+                )
                 sys.exit(1)
             rgba = pipeline.model.get_rgba_image(outputs, rgb_output_name)
-            
+
             # HSV filtering of sky
-            rgb_img = (rgba.cpu().numpy()[:,np.newaxis,:3] * 255).astype(np.uint8)
+            rgb_img = (rgba.cpu().numpy()[:, np.newaxis, :3] * 255).astype(np.uint8)
             bgr_img = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2BGR)
             hsv_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2HSV)
-           
-            lower = np.array([80,0, 216])
+
+            lower = np.array([80, 0, 216])
             upper = np.array([150, 255, 255])
 
             # Create HSV Image and threshold into a range.
-            mask_hsv = (cv2.inRange(hsv_img, lower, upper) == 0)
+            mask_hsv = cv2.inRange(hsv_img, lower, upper) == 0
             mask_hsv = torch.tensor(mask_hsv, dtype=torch.bool).to(rgba.device)
-            
+
             depth = outputs[depth_output_name]
             if normal_output_name is not None:
                 if normal_output_name not in outputs:
                     CONSOLE.rule("Error", style="red")
-                    CONSOLE.print(f"Could not find {normal_output_name} in the model outputs", justify="center")
-                    CONSOLE.print(f"Please set --normal_output_name to one of: {outputs.keys()}", justify="center")
+                    CONSOLE.print(
+                        f"Could not find {normal_output_name} in the model outputs",
+                        justify="center",
+                    )
+                    CONSOLE.print(
+                        f"Please set --normal_output_name to one of: {outputs.keys()}",
+                        justify="center",
+                    )
                     sys.exit(1)
                 normal = outputs[normal_output_name]
                 assert (
@@ -150,9 +182,9 @@ def generate_nerfgs(
 
             # Filter points with opacity lower than 0.5
             mask = rgba[..., -1] > 0.75
-            
+
             mask = torch.logical_and(mask, mask_hsv.squeeze())
-                  
+
             point = point[mask]
             view_direction = view_direction[mask]
             rgb = rgba[mask][..., :3]
@@ -166,7 +198,9 @@ def generate_nerfgs(
                     assert torch.all(
                         comp_l < comp_m
                     ), f"Bounding box min {bounding_box_min} must be smaller than max {bounding_box_max}"
-                    mask = torch.all(torch.concat([point > comp_l, point < comp_m], dim=-1), dim=-1)
+                    mask = torch.all(
+                        torch.concat([point > comp_l, point < comp_m], dim=-1), dim=-1
+                    )
                 else:
                     mask = crop_obb.within(point)
                 point = point[mask]
@@ -174,14 +208,14 @@ def generate_nerfgs(
                 view_direction = view_direction[mask]
                 if normal is not None:
                     normal = normal[mask]
-            
+
             points.append(point)
             rgbs.append(rgb)
             view_directions.append(view_direction)
             if normal is not None:
                 normals.append(normal)
             progress.advance(task, point.shape[0])
-    
+
     points = torch.cat(points, dim=0)
     rgbs = torch.cat(rgbs, dim=0)
     view_directions = torch.cat(view_directions, dim=0).cpu()
@@ -191,7 +225,7 @@ def generate_nerfgs(
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(points.double().cpu().numpy())
     pcd.colors = o3d.utility.Vector3dVector(rgbs.double().cpu().numpy())
-    
+
     ind = None
     if remove_outliers:
         CONSOLE.print("Cleaning Point Cloud")
@@ -205,7 +239,10 @@ def generate_nerfgs(
     if estimate_normals:
         if normal_output_name is not None:
             CONSOLE.rule("Error", style="red")
-            CONSOLE.print("Cannot estimate normals and use normal_output_name at the same time", justify="center")
+            CONSOLE.print(
+                "Cannot estimate normals and use normal_output_name at the same time",
+                justify="center",
+            )
             sys.exit(1)
         CONSOLE.print("Estimating Point Cloud Normals")
         pcd.estimate_normals()
@@ -225,11 +262,11 @@ def generate_nerfgs(
         normals[mask] *= -1
         pcd.normals = o3d.utility.Vector3dVector(normals.double().cpu().numpy())
 
-    
     filtered_points = torch.from_numpy(np.asarray(pcd.points)).to(points)
     density, shs = pipeline.model.field.get_spherical_harmonics(filtered_points)
-        
+
     return filtered_points, density, shs
+
 
 @dataclass
 class ExportNerfGS(Exporter):
@@ -271,25 +308,27 @@ class ExportNerfGS(Exporter):
     scaled and reoriented coordinate space expected by the NeRF models."""
 
     def k_nearest_sklearn(self, x: torch.Tensor, k: int):
-      """
-          Find k-nearest neighbors using sklearn's NearestNeighbors.
-      x: The data tensor of shape [num_samples, num_features]
-      k: The number of neighbors to retrieve
-      """
-      # Convert tensor to numpy array
-      x_np = x
+        """
+            Find k-nearest neighbors using sklearn's NearestNeighbors.
+        x: The data tensor of shape [num_samples, num_features]
+        k: The number of neighbors to retrieve
+        """
+        # Convert tensor to numpy array
+        x_np = x
 
-      # Build the nearest neighbors model
-      from sklearn.neighbors import NearestNeighbors
+        # Build the nearest neighbors model
+        from sklearn.neighbors import NearestNeighbors
 
-      nn_model = NearestNeighbors(n_neighbors=k + 1, algorithm="auto", metric="euclidean").fit(x_np)
+        nn_model = NearestNeighbors(
+            n_neighbors=k + 1, algorithm="auto", metric="euclidean"
+        ).fit(x_np)
 
-      # Find the k-nearest neighbors
-      distances, indices = nn_model.kneighbors(x_np)
+        # Find the k-nearest neighbors
+        distances, indices = nn_model.kneighbors(x_np)
 
-      # Exclude the point itself from the result and return
-      return distances[:, 1:].astype(np.float32), indices[:, 1:].astype(np.float32)
-  
+        # Exclude the point itself from the result and return
+        return distances[:, 1:].astype(np.float32), indices[:, 1:].astype(np.float32)
+
     def main(self) -> None:
         """Export point cloud."""
 
@@ -301,15 +340,25 @@ class ExportNerfGS(Exporter):
         validate_pipeline(self.normal_method, self.normal_output_name, pipeline)
 
         # Increase the batchsize to speed up the evaluation.
-        assert isinstance(pipeline.datamanager, (VanillaDataManager, ParallelDataManager))
+        assert isinstance(
+            pipeline.datamanager, (VanillaDataManager, ParallelDataManager)
+        )
         assert pipeline.datamanager.train_pixel_sampler is not None
-        pipeline.datamanager.train_pixel_sampler.num_rays_per_batch = self.num_rays_per_batch
+        pipeline.datamanager.train_pixel_sampler.num_rays_per_batch = (
+            self.num_rays_per_batch
+        )
 
         # Whether the normals should be estimated based on the point cloud.
         estimate_normals = self.normal_method == "open3d"
         crop_obb = None
-        if self.obb_center is not None and self.obb_rotation is not None and self.obb_scale is not None:
-            crop_obb = OrientedBox.from_params(self.obb_center, self.obb_rotation, self.obb_scale)
+        if (
+            self.obb_center is not None
+            and self.obb_rotation is not None
+            and self.obb_scale is not None
+        ):
+            crop_obb = OrientedBox.from_params(
+                self.obb_center, self.obb_rotation, self.obb_scale
+            )
         position, density, spherical_harmonics = generate_nerfgs(
             pipeline=pipeline,
             num_points=self.num_points,
@@ -318,7 +367,11 @@ class ExportNerfGS(Exporter):
             estimate_normals=estimate_normals,
             rgb_output_name=self.rgb_output_name,
             depth_output_name=self.depth_output_name,
-            normal_output_name=self.normal_output_name if self.normal_method == "model_output" else None,
+            normal_output_name=(
+                self.normal_output_name
+                if self.normal_method == "model_output"
+                else None
+            ),
             use_bounding_box=self.use_bounding_box,
             bounding_box_min=self.bounding_box_min,
             bounding_box_max=self.bounding_box_max,
@@ -331,48 +384,71 @@ class ExportNerfGS(Exporter):
         CONSOLE.print(f"[bold green]:white_check_mark: Generated {position.shape[0]}")
 
         nerfgs_filename = self.output_dir / "nerfgs.ply"
-        
+
         nerfgs_data = {}
         with torch.no_grad():
-          position = position.cpu().numpy()
-          nerfgs_data["positions"] = position
-          nerfgs_data["normals"] = np.zeros_like(position, dtype=np.float32)
+            position = position.cpu().numpy()
+            nerfgs_data["positions"] = position
+            nerfgs_data["normals"] = np.zeros_like(position, dtype=np.float32)
 
-          spherical_harmonics = spherical_harmonics.cpu().numpy()
+            spherical_harmonics = spherical_harmonics.cpu().numpy()
 
-          for i in range(spherical_harmonics.shape[1]):
-              if i < pipeline.model.config.sh_degree:
-                  nerfgs_data[f"f_dc_{i}"] = spherical_harmonics[:,i, None]
-              else:
-                  reformat_sh = spherical_harmonics[:, pipeline.model.config.sh_degree:]
-                  reformat_sh = reformat_sh.reshape(spherical_harmonics.shape[0], 3, -1)
-                  reformat_sh = np.swapaxes(reformat_sh, 1, 2)
-                  reformat_sh = reformat_sh.reshape(spherical_harmonics.shape[0], -1)
-                  nerfgs_data[f"f_rest_{i - pipeline.model.config.sh_degree}"] = spherical_harmonics[:,i, None]
+            for i in range(spherical_harmonics.shape[1]):
+                if i < pipeline.model.config.sh_degree:
+                    nerfgs_data[f"f_dc_{i}"] = spherical_harmonics[:, i, None]
+                else:
+                    reformat_sh = spherical_harmonics[
+                        :, pipeline.model.config.sh_degree :
+                    ]
+                    reformat_sh = reformat_sh.reshape(
+                        spherical_harmonics.shape[0], 3, -1
+                    )
+                    reformat_sh = np.swapaxes(reformat_sh, 1, 2)
+                    reformat_sh = reformat_sh.reshape(spherical_harmonics.shape[0], -1)
+                    nerfgs_data[f"f_rest_{i - pipeline.model.config.sh_degree}"] = (
+                        spherical_harmonics[:, i, None]
+                    )
 
-          nerfgs_data["opacity"] = density.cpu().numpy()
+            nerfgs_data["opacity"] = density.cpu().numpy()
 
-          distances, _ = self.k_nearest_sklearn(position, 3)
-          distances = torch.from_numpy(distances)
-          # find the average of the three nearest neighbors for each point and use that as the scale
-          avg_dist = distances.mean(dim=-1, keepdim=True)
-          avg_dist = torch.min(avg_dist, torch.quantile(avg_dist, 0.8))
-          scales = torch.log((avg_dist.repeat(1, 3) / 2)).cpu().numpy()
-          for i in range(3):
+            distances, _ = self.k_nearest_sklearn(position, 3)
+            distances = torch.from_numpy(distances)
+            # find the average of the three nearest neighbors for each point and use that as the scale
+            avg_dist = distances.mean(dim=-1, keepdim=True)
+            avg_dist = torch.min(avg_dist, torch.quantile(avg_dist, 0.8))
+            scales = torch.log((avg_dist.repeat(1, 3) / 2)).cpu().numpy()
+            for i in range(3):
                 nerfgs_data[f"scale_{i}"] = scales[:, i, None]
 
-          N = position.shape[0]
-          quats = np.hstack(
-              [
-                  np.zeros((N, 1)),
-                  np.zeros((N, 1)),
-                  np.zeros((N, 1)),
-                  np.ones((N, 1)),
-              ]
-          )
+            N = position.shape[0]
+            quats = np.hstack(
+                [
+                    np.zeros((N, 1)),
+                    np.zeros((N, 1)),
+                    np.zeros((N, 1)),
+                    np.ones((N, 1)),
+                ]
+            )
 
-          for i in range(4):
+            for i in range(4):
                 nerfgs_data[f"rot_{i}"] = quats[:, i, None]
+
+            n = position.shape[0]
+
+        select = np.ones(n, dtype=bool)
+        for k, t in nerfgs_data.items():
+            n_before = np.sum(select)
+            select = np.logical_and(select, np.isfinite(t).all(axis=1))
+            n_after = np.sum(select)
+            if n_after < n_before:
+                CONSOLE.print(f"{n_before - n_after} NaN/Inf elements in {k}")
+
+        if np.sum(select) < n:
+            CONSOLE.print(
+                f"values have NaN/Inf in map_to_tensors, only export {np.sum(select)}/{n}"
+            )
+            for k, t in nerfgs_data.items():
+                nerfgs_data[k] = nerfgs_data[k][select, :]
 
         pcd = o3d.t.geometry.PointCloud(nerfgs_data)
 
@@ -380,11 +456,11 @@ class ExportNerfGS(Exporter):
 
         CONSOLE.print("[bold green]:white_check_mark: Saving Spherical Harmonics")
 
+
 Commands = tyro.conf.FlagConversionOff[
-    Union[
-          Annotated[ExportNerfGS, tyro.conf.subcommand(name="NerfGS")],
-    ]
+    Union[Annotated[ExportNerfGS, tyro.conf.subcommand(name="NerfGS")],]
 ]
+
 
 def entrypoint():
     """Entrypoint for use with pyproject scripts."""
