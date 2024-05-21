@@ -11,7 +11,16 @@ https://github.com/grasp-lyrl/NeRFtoGSandBack/assets/69362937/41d896e1-3e09-4fca
 This repository follows the nerfstudio method [template](https://github.com/nerfstudio-project/nerfstudio-method-template/tree/main)
 
 ### 0. Install Nerfstudio dependencies
-Please follow the Nerfstudio [installation guide](https://docs.nerf.studio/quickstart/installation.html)  to create an environment and install dependencies.
+Please follow the [installation guide](https://docs.nerf.studio/quickstart/installation.html)  to create an environment and install dependencies including PyTorch and tiny-cuda-nn.
+
+As mentioned in this [issue](https://github.com/grasp-lyrl/NeRFtoGSandBack/issues/4), the code currently works with only the older version of nerfstudio and gsplat. Please install nerfstudio and gsplat following:
+
+```
+pip uninstall gsplat nerfstudio -y
+
+pip install gsplat==0.1.3
+pip install git+https://github.com/nerfstudio-project/nerfstudio.git@v1.0.1
+```
 
 ### 1. Install the repository
 Clone and navigate into this repository. Run the following commands:
@@ -54,7 +63,7 @@ Replace `DATA_PATH` with the data directory location. You also need to add `nerf
 ### Fintuned NeRFGS 
 We reduces the learning rate for finetuning. You also need to add `nerfstudio-data --eval-mode filename` if train on Wissahickon or Locust-Walk.
 
-`ns-train nerfgs --data DATA_PATH --pipeline.model.ply-file-path exports/nerfgs/nerfgs.ply --max-num-iterations 5000 --pipeline.model.sh-degree-interval 0 --pipeline.model.warmup-length 100 --optimizers.xyz.optimizer.lr 0.00001 --optimizers.xyz.scheduler.lr-pre-warmup 0.0000001 --optimizers.xyz.scheduler.lr-final 0.0000001 --optimizers.features-dc.optimizer.lr 0.01 --optimizers.features-rest.optimizer.lr 0.001 --optimizers.opacity.optimizer.lr 0.05 --optimizers.scaling.optimizer.lr 0.01 --optimizers.rotation.optimizer.lr 0.0000000001 --optimizers.camera-opt.optimizer.lr 0.0000000001 --optimizers.camera-opt.scheduler.lr-pre-warmup 0.0000000001 --optimizers.camera-opt.scheduler.lr-final 0.0000000001`
+`ns-train nerfgs --data DATA_PATH --pipeline.model.ply-file-path exports/nerfgs/nerfgs.ply --max-num-iterations 5000 --pipeline.model.sh-degree-interval 1 --pipeline.model.warmup-length 100 --optimizers.xyz.optimizer.lr 0.00001 --optimizers.xyz.scheduler.lr-pre-warmup 0.0000001 --optimizers.xyz.scheduler.lr-final 0.0000001 --optimizers.features-dc.optimizer.lr 0.01 --optimizers.features-rest.optimizer.lr 0.001 --optimizers.opacity.optimizer.lr 0.05 --optimizers.scaling.optimizer.lr 0.01 --optimizers.rotation.optimizer.lr 0.0000000001 --optimizers.camera-opt.optimizer.lr 0.0000000001 --optimizers.camera-opt.scheduler.lr-pre-warmup 0.0000000001 --optimizers.camera-opt.scheduler.lr-final 0.0000000001`
 
 ## GSNeRF: Gaussian Splats to NeRFs
 

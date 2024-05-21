@@ -7,6 +7,7 @@ from torch.cuda.amp.grad_scaler import GradScaler
 from torch.nn.parallel import DistributedDataParallel as DDP
 
 from nerfgs.nerfgs_model import nerfgsModelConfig, nerfgsModel
+from nerfgs.nerfgs_datamanager import NerfgsDatamanagerConfig, NerfgsDatamanager
 
 from nerfstudio.models.base_model import ModelConfig
 from nerfstudio.pipelines.base_pipeline import (
@@ -36,13 +37,16 @@ class nerfgsPipelineConfig(VanillaPipelineConfig):
 
     _target: Type = field(default_factory=lambda: nerfgsPipeline)
     """target class to instantiate"""
-    # datamanager: DataManagerConfig = field(default_factory=DataManagerConfig)
+    datamanager: DataManagerConfig = NerfgsDatamanagerConfig()
     """specifies the datamanager config"""
-    model: ModelConfig = field(default_factory=nerfgsModelConfig)
+    model: ModelConfig = nerfgsModelConfig() # field(default_factory=nerfgsModelConfig)
     """specifies the model config"""
     export_nerf_gs_data: bool = False
 
 class nerfgsPipeline(VanillaPipeline):
+  
+  config: nerfgsPipelineConfig
+
   def __init__(
     self,
     config: nerfgsPipelineConfig,
@@ -117,7 +121,7 @@ class nerfgsPipeline(VanillaPipeline):
       
       self.eval()
       metrics_dict_list = []
-      assert isinstance(self.datamanager, (VanillaDataManager, ParallelDataManager, FullImageDatamanager))
+      assert isinstance(self.datamanager, NerfgsDatamanager)
       num_images = len(self.datamanager.fixed_indices_eval_dataloader)
       with Progress(
           TextColumn("[progress.description]{task.description}"),

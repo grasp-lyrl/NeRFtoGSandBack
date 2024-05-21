@@ -10,6 +10,7 @@ from nerfgs.nerfgs_model import nerfgsModelConfig
 from nerfgs.nerfgs_pipeline import (
     nerfgsPipelineConfig,
 )
+from nerfgs.nerfgs_datamanager import NerfgsDatamanagerConfig
 
 from nerfstudio.cameras.camera_optimizers import CameraOptimizerConfig
 from nerfstudio.data.datamanagers.parallel_datamanager import ParallelDataManagerConfig
@@ -23,7 +24,6 @@ from nerfstudio.engine.schedulers import (
 )
 from nerfstudio.engine.trainer import TrainerConfig
 from nerfstudio.plugins.types import MethodSpecification
-from nerfstudio.data.datamanagers.full_images_datamanager import FullImageDatamanagerConfig
 from nerfstudio.pipelines.base_pipeline import VanillaPipelineConfig
 
 
@@ -38,7 +38,7 @@ nerfgs = MethodSpecification(
         mixed_precision=False,
         gradient_accumulation_steps={"camera_opt": 100},
         pipeline=nerfgsPipelineConfig(
-            datamanager=FullImageDatamanagerConfig(
+            datamanager=NerfgsDatamanagerConfig(
                 dataparser=NerfstudioDataParserConfig(load_3D_points=True),
             ),
             model=nerfgsModelConfig(),
