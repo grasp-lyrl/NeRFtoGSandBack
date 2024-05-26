@@ -14,8 +14,7 @@ This repository follows the nerfstudio method [template](https://github.com/nerf
 ### 0. Install Nerfstudio dependencies
 Please follow the [installation guide](https://docs.nerf.studio/quickstart/installation.html)  to create an environment and install dependencies including PyTorch and tiny-cuda-nn.
 
-As mentioned in this [issue](https://github.com/grasp-lyrl/NeRFtoGSandBack/issues/4), the code currently works with only the older version of nerfstudio and gsplat. Please install nerfstudio and gsplat following:
-
+**As mentioned in this [issue](https://github.com/grasp-lyrl/NeRFtoGSandBack/issues/4), the code currently works with only the older version of nerfstudio and gsplat. Please install nerfstudio and gsplat following:**
 ```
 pip uninstall gsplat nerfstudio -y
 
