@@ -1,7 +1,8 @@
 # From NeRFs to Gaussian Splats, and Back
 This is the implementation of [From NeRFs to Gaussian Splats, and Back](https://arxiv.org/abs/2405.09717); An efficient procedure to convert back and forth between NeRF and GS, and thereby get the best of both approaches. New dataset in the paper can be downloaded from [this google drive link](https://drive.google.com/drive/folders/1xvbONL4EVgHxaHMsV101455l_jNgyaUM?usp=sharing).
 
-https://github.com/grasp-lyrl/NeRFtoGSandBack/assets/69362937/41d896e1-3e09-4fca-a9e5-486e1d9a7d07
+
+https://github.com/grasp-lyrl/NeRFtoGSandBack/assets/69362937/7f1d8f55-79f4-4090-9ba7-f5d1b9a17edb
 
 <p align="center">
   <img src="https://github.com/grasp-lyrl/NeRFtoGSandBack/assets/69362937/ce6f4bff-da19-4f6a-8d9b-335a5e3a1905">
@@ -13,8 +14,7 @@ This repository follows the nerfstudio method [template](https://github.com/nerf
 ### 0. Install Nerfstudio dependencies
 Please follow the [installation guide](https://docs.nerf.studio/quickstart/installation.html)  to create an environment and install dependencies including PyTorch and tiny-cuda-nn.
 
-As mentioned in this [issue](https://github.com/grasp-lyrl/NeRFtoGSandBack/issues/4), the code currently works with only the older version of nerfstudio and gsplat. Please install nerfstudio and gsplat following:
-
+**As mentioned in this [issue](https://github.com/grasp-lyrl/NeRFtoGSandBack/issues/4), the code currently works with only the older version of nerfstudio and gsplat. Please install nerfstudio and gsplat following:**
 ```
 pip uninstall gsplat nerfstudio -y
 
@@ -92,9 +92,3 @@ The conversion from NeRF to GS has inefficiency as mentioned at the discussion s
       primaryClass={cs.CV}
 }
 ```
-## More demos
-
-
-https://github.com/grasp-lyrl/NeRFtoGSandBack/assets/69362937/8f279f57-31f5-4fdf-9b74-45b05c0ebca8
-
-
