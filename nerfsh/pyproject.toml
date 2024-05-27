@@ -3,7 +3,7 @@ name = "nerfsh"
 description = "nerfsh: nerf with spherical harmonics output."
 version = "0.1.0"
 
-dependencies = ["nerfstudio >= 0.3.0", "plyfile >= 1.0.3", "ipdb >= 0.13.13"] 
+dependencies = ["nerfstudio == 1.0.1", "gsplat == 0.1.3", "plyfile >= 1.0.3", "ipdb >= 0.13.13"] 
 
 [tool.setuptools.packages.find]
 include = ["nerfsh*"]
