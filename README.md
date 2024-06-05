@@ -68,7 +68,11 @@ We reduces the learning rate for finetuning. You also need to add `nerfstudio-da
 ## GSNeRF: Gaussian Splats to NeRFs
 
 ### Scene modification
-Coming soon
+To remove a bounding box of Gaussians in nerfgs, we add the following argument in the ns-train call:
+
+`ns-train nerfgs --data DATA_PATH --max-num-iterations 1 --pipeline.model.ply-file-path exports/nerfgs/nerfgs.ply --pipeline.model.bottom_remove_box_corner "(MIN_X, MIN_Y, MIN_Z)" --pipeline.model.top_remove_box_corner "(MAX_X, MAX_Y, MAX_Z)"`
+
+These arguments create a 3D box spanning from the minimum x, y, z values to the maximum x, y, z value and removes Gaussians with means located inside the box.
 
 ### Rendering new training images
 In the new dataset, training images are rendered from splats. Replace `CONFIG_LOCATION` with the location of config file saved after training.
