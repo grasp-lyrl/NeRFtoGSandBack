@@ -11,16 +11,18 @@ from torch.nn import Parameter
 from dataclasses import dataclass, field
 from typing import Type
 
-import numpy as np
 import torch
 
 from plyfile import PlyData
+import ast
 
 @dataclass
 class nerfgsModelConfig(SplatfactoModelConfig):
   _target: Type = field(default_factory=lambda: nerfgsModel)
   load_ply: bool = True
-  ply_file_path: str = None
+  ply_file_path: str = ""
+  bottom_remove_box_corner: str = ""
+  top_remove_box_corner: str = ""
 
 class nerfgsModel(SplatfactoModel):
   config: nerfgsModelConfig
@@ -58,10 +60,14 @@ class nerfgsModel(SplatfactoModel):
 
     # Read from ply file
     ply_data = PlyData.read(self.config.ply_file_path)
-    old_vertices = ply_data['vertex']
+    vertices = ply_data['vertex']
     device = self.means.device
-    # Remove bounding box
-    vertices = old_vertices # self.remove_bounding_box(old_vertices, device)
+
+    # Remove bounding box if provided 
+    if len(self.config.bottom_remove_box_corner) > 0 and len(self.config.top_remove_box_corner) > 0:
+      self.config.bottom_remove_box_corner = ast.literal_eval(self.config.bottom_remove_box_corner)
+      self.config.top_remove_box_corner = ast.literal_eval(self.config.top_remove_box_corner)
+      vertices = self.remove_bounding_box(vertices, device)
 
     num_splats = len(vertices)
 
@@ -88,12 +94,6 @@ class nerfgsModel(SplatfactoModel):
         for i in range(num_sh_bases(self.config.sh_degree) - 1):
             f_rest_portion[:, i] = torch.tensor(vertices['f_rest_{}'.format(i)], device = device)
         f_rests[:, :, j] = f_rest_portion
-    print("Means shape: ", means.shape)
-    print("Scales shape: ", scales.shape)
-    print("Opacity shape: ", opacities.shape)
-    print("Quats shape: ", quats.shape)
-    print("features dc shape: ", features_dc.shape)
-    print("f_rests shape: ", f_rests.shape)
 
     self.means = torch.nn.Parameter(means)
     self.scales = torch.nn.Parameter(scales)
@@ -101,6 +101,28 @@ class nerfgsModel(SplatfactoModel):
     self.opacities = torch.nn.Parameter(opacities)
     self.features_dc = torch.nn.Parameter(features_dc)
     self.features_rest = torch.nn.Parameter(f_rests)
-    # super().load_state_dict(dict, **kwargs)
+
+  def remove_bounding_box(self, vertices, device):
+        min_x = self.config.bottom_remove_box_corner[0] # 0.6220401063486586
+        max_x = self.config.top_remove_box_corner[0] # 0.7601881605528515
+        min_y = self.config.bottom_remove_box_corner[1] # -0.5871678744127707
+        max_y = self.config.top_remove_box_corner[1]  #-0.4676805579564234
+        min_z =  self.config.bottom_remove_box_corner[2] #-0.0712212514966822
+        max_z =  self.config.top_remove_box_corner[2] #0.26269306846814755
+
+        means = torch.stack((torch.tensor(vertices['x'], device = device),
+                             torch.tensor(vertices['y'], device = device),
+                             torch.tensor(vertices['z'], device =device)), dim=1)
+        valid_vertices = []
+        for mean in means:
+            # If inside box then we want to remove it
+            if mean[0] <  max_x and mean[0] > min_x and mean[1] < max_y and mean[1] > min_y and mean[2] < max_z and mean[2] > min_z:
+                valid_vertices.append(False)
+            else:
+                valid_vertices.append(True)
+
+        vertices = vertices[valid_vertices]
+
+        return vertices
 
 
