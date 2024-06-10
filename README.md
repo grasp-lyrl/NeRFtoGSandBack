@@ -1,5 +1,5 @@
 # From NeRFs to Gaussian Splats, and Back
-This is the implementation of [From NeRFs to Gaussian Splats, and Back](https://arxiv.org/abs/2405.09717); An efficient procedure to convert back and forth between NeRF and GS, and thereby get the best of both approaches. New dataset in the paper can be downloaded from [this google drive link](https://drive.google.com/drive/folders/1xvbONL4EVgHxaHMsV101455l_jNgyaUM?usp=sharing).
+This is the implementation of [From NeRFs to Gaussian Splats, and Back](https://arxiv.org/abs/2405.09717); An efficient procedure to convert back and forth between NeRF and GS, and thereby get the best of both approaches. New dataset in the paper can be downloaded from [this google drive link](https://drive.google.com/drive/folders/1xvbONL4EVgHxaHMsV101455l_jNgyaUM?usp=sharing). This is now a part of [nerfstudio methods](https://docs.nerf.studio/nerfology/methods/nerf2gs2nerf.html) and you can use it directly from nerfstudio!
 
 
 https://github.com/grasp-lyrl/NeRFtoGSandBack/assets/69362937/7f1d8f55-79f4-4090-9ba7-f5d1b9a17edb
